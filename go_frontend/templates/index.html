@@ -1,0 +1,288 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Lonelyweb Videos</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                background-color: #333;
+                color: #eee;
+                padding: 20px;
+            }
+            .container {
+                background-color: #444;
+                padding: 20px;
+                border-radius: 5px;
+                text-align: center; /* Center button */
+            }
+            .error {
+                color: #ff6b6b;
+            }
+            .description {
+                margin-top: 10px;
+                text-align: left; /* Align text inside this block to the left */
+                max-width: 640px; /* Set a max-width (e.g., same as player) */
+                width: 90%; /* Allow it to be responsive but not exceed max-width */
+                margin-left: auto; /* Center the block */
+                margin-right: auto; /* Center the block */
+                padding: 10px; /* Added for better spacing */
+                background-color: #2a2a2a; /* Added for visual separation */
+                border-radius: 4px; /* Added for rounded corners */
+                color: lightblue;
+            }
+            .video-info {
+                margin-top: 10px;
+                text-align: left; /* Align text inside this block to the left */
+                max-width: 640px; /* Set a max-width (e.g., same as player) */
+                width: 90%; /* Allow it to be responsive but not exceed max-width */
+                margin-left: auto; /* Center the block */
+                margin-right: auto; /* Center the block */
+                padding: 10px; /* Added for better spacing */
+                background-color: #2a2a2a; /* Added for visual separation */
+                border-radius: 4px; /* Added for rounded corners */
+            }
+            .action-button {
+                display: inline-block;
+                margin-top: 15px;
+                padding: 10px 20px;
+                font-size: 1em;
+                color: #000; /* Changed to black for contrast */
+                background-color: lightblue; /* Changed to lightblue */
+                border: none;
+                border-radius: 4px;
+                text-decoration: none;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+            .action-button:hover {
+                background-color: steelblue; /* Darker blue for hover */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Lonelyweb Videos</h1>
+
+            <div class="description">
+                Lonelyweb Videos is designed to promote and showcase obscure
+                YouTube videos. The web is full of wierd, wild and funny things
+                when you stray from the well-trodden path and this site is
+                intended to be a reminder of that.
+            </div>
+
+            <p>Total Videos in Library: {{ .TotalVideos }}</p>
+
+            {{ if .ErrorMessage }}
+            <p class="error">Error from Server: {{ .ErrorMessage }}</p>
+            {{ end }} {{ if .Video }}
+            <center>
+                <h2>Current Video:</h2>
+                <div
+                    id="player-container"
+                    style="
+                        position: relative;
+                        padding-bottom: 56.25%;
+                        height: 0;
+                        overflow: hidden;
+                        max-width: 640px;
+                        background: #000;
+                    "
+                >
+                    <div
+                        id="youtube-player"
+                        style="
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                        "
+                    >
+                        <!-- JS will create player here -->
+                    </div>
+                </div>
+            </center>
+            <div class="video-info">
+                <h3 id="video-title">{{ .Video.Title }}</h3>
+                <p>
+                    <strong>Channel:</strong>
+                    <span id="video-channel">{{ .Video.ChannelTitle }}</span>
+                </p>
+                <p>
+                    <strong>Views:</strong>
+                    <span id="video-views">{{ .Video.ViewCount }}</span>
+                </p>
+                <p>
+                    <strong>Original URL:</strong>
+                    <a
+                        id="video-original-url"
+                        href="{{ .Video.URL }}"
+                        target="_blank"
+                        style="color: lightblue;"
+                        >{{ .Video.URL }}</a
+                    >
+                </p>
+            </div>
+            <button id="new-video-button" class="action-button">
+                Show New Video
+            </button>
+            <script>
+                var player;
+                var initialVideoId = "{{ .Video.VideoID }}"; // Passed from Go template
+
+                function onYouTubeIframeAPIReady() {
+                    console.log(
+                        "Simplified: YouTube API Ready. Initial Video ID:",
+                        initialVideoId,
+                    );
+                    if (!initialVideoId) {
+                        console.error(
+                            "Simplified: No initial video ID provided to script.",
+                        );
+                        document.getElementById("video-title").textContent =
+                            "Error: No initial video ID for player.";
+                        return;
+                    }
+                    player = new YT.Player("youtube-player", {
+                        height: "390", // Can be overridden by CSS aspect ratio
+                        width: "640", // Can be overridden by CSS aspect ratio
+                        videoId: initialVideoId,
+                        playerVars: {
+                            autoplay: 1,
+                            controls: 1,
+                            enablejsapi: 1,
+                            // 'mute': 1, // Add if autoplay is blocked
+                        },
+                        events: {
+                            onReady: onPlayerReady,
+                            onStateChange: onPlayerStateChange,
+                            onError: onPlayerError,
+                        },
+                    });
+                }
+
+                function onPlayerReady(event) {
+                    console.log(
+                        "Simplified: Player ready for video: " + initialVideoId,
+                    );
+                    // event.target.mute(); // Uncomment for muted autoplay
+                    event.target.playVideo();
+
+                    // Add event listener for the new video button
+                    const newVideoButton =
+                        document.getElementById("new-video-button");
+                    if (newVideoButton) {
+                        newVideoButton.addEventListener("click", function () {
+                            console.log(
+                                "Simplified: 'Show New Video' button clicked.",
+                            );
+                            if (player) {
+                                // Ensure player is available
+                                player.stopVideo(); // Optional: stop current video before loading next
+                            }
+                            loadNextVideo();
+                        });
+                    } else {
+                        console.error(
+                            "Simplified: Could not find the 'new-video-button'.",
+                        );
+                    }
+                }
+
+                function onPlayerStateChange(event) {
+                    if (event.data == YT.PlayerState.ENDED) {
+                        console.log(
+                            "Simplified: Video ended. Attempting to load next.",
+                        );
+                        loadNextVideo();
+                    }
+                }
+
+                function onPlayerError(event) {
+                    console.error(
+                        "Simplified: YouTube Player Error:",
+                        event.data,
+                    );
+                    document.getElementById("video-title").textContent =
+                        "Player Error: " + event.data;
+                }
+
+                function loadNextVideo() {
+                    console.log("Simplified: Fetching next video...");
+                    fetch("/next-video-json")
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(
+                                    "Network response was not ok for next video",
+                                );
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            if (data.error) {
+                                console.error(
+                                    "Simplified: Server error fetching next video:",
+                                    data.error,
+                                );
+                                document.getElementById(
+                                    "video-title",
+                                ).textContent = "Server Error: " + data.error;
+                                return;
+                            }
+                            console.log(
+                                "Simplified: Next video ID:",
+                                data.videoId,
+                            );
+                            if (player && data.videoId) {
+                                player.loadVideoById(data.videoId);
+                                updateVideoInfo(data);
+                            }
+                        })
+                        .catch((error) => {
+                            console.error(
+                                "Simplified: Error loading next video:",
+                                error,
+                            );
+                            document.getElementById("video-title").textContent =
+                                "Fetch Error: " + error.message;
+                        });
+                }
+
+                function updateVideoInfo(videoData) {
+                    document.getElementById("video-title").textContent =
+                        videoData.title || "N/A";
+                    document.getElementById("video-channel").textContent =
+                        videoData.channelTitle || "N/A";
+                    document.getElementById("video-views").textContent =
+                        videoData.viewCount !== undefined
+                            ? videoData.viewCount
+                            : "N/A";
+                    const urlLink =
+                        document.getElementById("video-original-url");
+                    urlLink.href = videoData.url || "#";
+                    urlLink.textContent = videoData.url || "N/A";
+                }
+
+                // Load the IFrame Player API code asynchronously.
+                var tag = document.createElement("script");
+                tag.src = "https://www.youtube.com/iframe_api";
+                var firstScriptTag = document.getElementsByTagName("script")[0];
+                if (firstScriptTag) {
+                    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                } else {
+                    document.head.appendChild(tag); // Fallback if no script tags yet (unlikely)
+                }
+            </script>
+            {{ else }}
+            <p>
+                No video loaded. {{ if .ErrorMessage }}
+                <!-- Inner IF -->
+                Additional info: {{ .ErrorMessage }} {{ end }}
+                <!-- Inner END for ErrorMessage -->
+            </p>
+            {{ end }}
+            <!-- Outer END for .Video -->
+        </div>
+    </body>
+</html>
