@@ -44,7 +44,6 @@ lonelyweb/
 │   └── data/               # Directory where the live SQLite database is stored
 │       └── youtube_videos.db # The primary SQLite database populated by collector scripts
 └── legacy/                 # Legacy files
-    └── lonelyweb.txt       # A sample text file containing YouTube video URLs for import
 ```
 
 ## Setup
