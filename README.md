@@ -32,7 +32,6 @@ lonelyweb/
 │   ├── database.go         # Go database interaction (in-memory with embedded data)
 │   ├── templates/          # HTML templates (embedded at compile time)
 │   │   └── index.html
-│   ├── static/             # Static assets (CSS, client-side JS libraries if any)
 │   ├── data/               # Directory for embedded data source
 │   │   └── embedded_data.sql # SQL dump of the video database (embedded at compile time)
 │   ├── go.mod              # Go module definition

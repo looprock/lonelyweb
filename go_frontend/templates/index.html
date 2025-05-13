@@ -31,6 +31,18 @@
                 border-radius: 4px; /* Added for rounded corners */
                 color: lightblue;
             }
+            .disclaimer {
+                margin-top: 10px;
+                text-align: left; /* Align text inside this block to the left */
+                max-width: 640px; /* Set a max-width (e.g., same as player) */
+                width: 90%; /* Allow it to be responsive but not exceed max-width */
+                margin-left: auto; /* Center the block */
+                margin-right: auto; /* Center the block */
+                padding: 10px; /* Added for better spacing */
+                background-color: #2a2a2a; /* Added for visual separation */
+                border-radius: 4px; /* Added for rounded corners */
+                color: ghostwhite;
+            }
             .video-info {
                 margin-top: 10px;
                 text-align: left; /* Align text inside this block to the left */
@@ -65,10 +77,16 @@
             <h1>Lonelyweb Videos</h1>
 
             <div class="description">
-                Lonelyweb Videos is designed to promote and showcase obscure
-                YouTube videos. The web is full of wierd, wild and funny things
-                when you stray from the well-trodden path and this site is
-                intended to be a reminder of that.
+                Lonelyweb Videos is designed to showcase obscure YouTube videos.
+                The web is full of wierd, wild and funny things when you stray
+                from the well-trodden path and this site is intended to be a
+                reminder of that.
+            </div>
+            <div class="disclaimer">
+                DISCLAIMER: This list is programmatically generated based on the
+                sole criteria of having less than 100 views and not moderated
+                for content so you could encounter just about anything. Watch at
+                your own risk!
             </div>
 
             <p>Total Videos in Library: {{ .TotalVideos }}</p>
@@ -119,7 +137,7 @@
                         id="video-original-url"
                         href="{{ .Video.URL }}"
                         target="_blank"
-                        style="color: lightblue;"
+                        style="color: lightblue"
                         >{{ .Video.URL }}</a
                     >
                 </p>
